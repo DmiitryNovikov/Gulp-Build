@@ -21,9 +21,15 @@ const imagemin = require("gulp-imagemin"); // сжатие изображени�
 const htmlmin = require("gulp-htmlmin"); //Минификация HTML
 const size = require("gulp-size"); //Прописывает размер файло и их названия в терминале
 const del = require("del"); //плагин по отчистке
-const browsersync = require("browser-sync").create(); //плагин по отчистке
 const newer = require("gulp-newer");
 const fs = require("fs");
+//Ниже плагины для svg спрайта
+const svgSprite = require("gulp-svg-sprite");
+const svgmin = require("gulp-svgmin");
+const cheerio = require("gulp-cheerio");
+const replace = require("gulp-replace");
+
+const browsersync = require("browser-sync").create(); //плагин для синхронизации инфо в браузере
 
 //? Прописываем пути. Src - путь откуда. Dest - путь куда
 
@@ -59,6 +65,13 @@ const paths = {
     src: "src/fonts/*.otf",
     dest: "src/fonts/",
   },
+
+  //Для svg спрайта
+  svg: {
+    src: "src/icons/for_sprite/*.svg",
+    dest: "dist/icons/sprite/",
+  },
+  //Для иконочного шрифта
 };
 
 //? Прописываем ф-ции
@@ -182,6 +195,50 @@ function otf2ttf() {
     .pipe(gulp.dest(paths.otffon.dest));
 }
 
+//_________________Функция SVG спрайт_________________
+
+function svgSpriteBuild() {
+  return gulp
+    .src(paths.svg.src)
+    .pipe(
+      svgmin({
+        js2svg: {
+          pretty: true,
+        },
+      })
+    )
+    .pipe(
+      cheerio({
+        run: function ($) {
+          $("[fill]").removeAttr("fill");
+          $("[stroke]").removeAttr("stroke");
+          $("[style]").removeAttr("style");
+        },
+        parserOptions: { xmlMode: true },
+      })
+    )
+    .pipe(replace("&gt;", ">"))
+    .pipe(
+      svgSprite({
+        mode: {
+          stack: {
+            sprite: "../sprite.svg", //sprite file name
+          },
+        },
+      })
+    )
+    .pipe(
+      // Прописываем размер в терминале и название файла
+      size({
+        showFiles: true,
+      })
+    )
+    .pipe(gulp.dest(paths.svg.dest));
+}
+
+//_________________Для иконочного шрифта_________________
+
+//_____Наблюдаем за изменениями__________
 function watch() {
   //Запускаем сам сервер
   browsersync.init({
@@ -190,10 +247,11 @@ function watch() {
     },
   });
   gulp.watch(paths.html.dest).on("change", browsersync.reload); //задаем слежение за HTML и назначаем задачу в случае его изменения "обновелние в браузере"
-  gulp.watch(paths.html.src, html);
+  gulp.watch(paths.html.src, html); //следим за HTML
   gulp.watch(paths.styles.src, styles); //следим за стилями
   gulp.watch(paths.scripts.src, scripts); //следим за JS
-  gulp.watch(paths.images.src, img);
+  gulp.watch(paths.images.src, img); //следим за img
+  gulp.watch(paths.svg.src, svgSpriteBuild); //следим за svg-спрайтом
 }
 
 /* series - позваляет вызывать функции (задачи) последовательно
@@ -202,13 +260,14 @@ parallel  - позваляет вызывать функции (задачи) п
 const build = gulp.series(
   clean,
   html,
-  gulp.parallel(styles, scripts, img, fontsWoff, fontsWoff2),
+  gulp.parallel(fontsWoff, fontsWoff2, styles, scripts, img, svgSpriteBuild),
   watch
 );
 
 //? Экспортируем функции тем самым даем возможность вызова через терминал gulp "название"
 
 exports.clean = clean;
+exports.svgSpriteBuild = svgSpriteBuild; //вызов по созданию спрайта в dist
 exports.fontsWoff = fontsWoff;
 exports.fontsWoff2 = fontsWoff2;
 exports.otf2ttf = otf2ttf; //Запуск функции ниже в ручном режиме, не прописана задача в build.ВАЖНО!Санчала запуск gulp otf2ttf и только потом gulp

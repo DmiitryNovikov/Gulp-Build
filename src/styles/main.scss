@@ -1,15 +1,16 @@
+@import "fonts.scss";
 
-.text {
-  font-family: baltica ;
-  background-color: red;
-  font-size: 36px;
-  font-weight: 900;
-  font-style: normal
-}
+
 
 .text1 {
-  font-family: baltica ;
+  font-family: "WaterBrush";
   background-color: red;
   font-size: 36px;
-  font-weight: 600;
+  font-weight: bold;
 }
+
+
+.icon_insta:hover {
+  fill: red
+}
+

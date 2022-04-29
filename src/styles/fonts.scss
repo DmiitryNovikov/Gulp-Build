@@ -1,16 +1,7 @@
-//Подключаем миксин для шрифтов. Важно! Формат otf не прописан в миксине. Вставить в миксин при необхоидмости.
-@mixin font-face($font-name, $path, $weight: normal, $style: normal) {
-	@font-face {
-	font-family: quote($font-name);
-    src:
-        url("#{$path}.woff") format("woff"),
-        url("#{$path}.woff2") format("woff2");
-	font-weight: #{$weight};
-	font-style: #{$style};
-	}
-}
-
-//Прописываем название, путь откуда брать файлы со шрифтами, размер и стиль. Важно брать шрфиты с папки dist, так-как туда скомпелирвоаны форматы woff woff2. ВАЖНО! Шрифты тянем с папки dist, не src
-@include font-face ("baltica", "../../dist/fonts/baltica", 400,"normal");
-@include font-face ("baltica", "../../dist/fonts/baltica", 600,"normal");
-@include font-face ("baltica", "../../dist/fonts/baltica", 800,"normal");
+@font-face {
+    font-family: "WaterBrush";
+    src: url(dist/fonts/WaterBrush-Regular.woff) format("woff");
+    src: url(dist/fonts/WaterBrush-Regular.woff2) format("woff2");
+    font-weight: bold;
+    font-style: italic;
+  }
